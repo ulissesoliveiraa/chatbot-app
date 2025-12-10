@@ -1,0 +1,5 @@
+flask
+gunicorn
+python-dotenv
+PyPDF2
+openai    # a lib oficial funciona também com openrouter

@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Chatbot Zezim{% endblock %}
+
+{% block content %}
+<div class="layout">
+  <section class="chat-panel">
+    <div class="chat-header">
+      <div>
+        <h1>Chatbot Zezim</h1>
+        <p class="muted">
+          Faça perguntas livres ou, se configurado, dentro do contexto da sua empresa/documento.
+        </p>
+      </div>
+      <button id="resetChat" class="btn-secondary small">Limpar conversa</button>
+    </div>
+
+    <div id="chatWindow" class="chat-window">
+      <div class="message bot">
+        <div class="avatar">🤖</div>
+        <div class="bubble">
+          Olá! Eu sou o Chatbot Zezim. Como posso ajudar hoje?
+        </div>
+      </div>
+    </div>
+
+    <form id="chatForm" class="chat-input-area">
+      <textarea
+        id="messageInput"
+        rows="2"
+        placeholder="Digite sua pergunta e pressione Enter ou clique em Enviar..."
+      ></textarea>
+      <button type="submit" class="btn-primary">Enviar</button>
+    </form>
+  </section>
+
+  <aside class="config-panel">
+    <h2>Configurações</h2>
+
+    {% if logged_in %}
+      <p class="muted">
+        Você está logado. Aqui você pode controlar a personalidade do Zezim e o contexto de empresa/documento.
+      </p>
+
+      <form method="post" action="{{ url_for('config') }}" enctype="multipart/form-data" class="form">
+
+        <label class="form-label">
+          Personalidade do Chatbot Zezim
+          <textarea
+            name="persona_text"
+            rows="6"
+            class="input textarea"
+          >{{ persona_text }}</textarea>
+          <span class="help-text">
+            Descreva como o Zezim deve se comportar (tom de voz, estilo de resposta, etc.).
+          </span>
+        </label>
+
+        <label class="form-label">
+          Modo de resposta
+          <select name="mode" class="input">
+            <option value="no_context" {% if mode == "no_context" %}selected{% endif %}>
+              Sem contexto (apenas personalidade)
+            </option>
+            <option value="context" {% if mode == "context" %}selected{% endif %}>
+              Usar contexto de empresa/documento
+            </option>
+          </select>
+          <span class="help-text">
+            Em modo contexto, o Zezim responde somente com base nos dados enviados.
+          </span>
+        </label>
+
+        <label class="form-label">
+          Arquivo de contexto (.txt ou .pdf)
+          <input type="file" name="context_file" class="input">
+          {% if has_context %}
+            <span class="badge good">Contexto atual carregado ✅</span>
+          {% else %}
+            <span class="badge">Nenhum arquivo carregado.</span>
+          {% endif %}
+        </label>
+
+        <button type="submit" class="btn-secondary full">
+          Salvar configurações
+        </button>
+      </form>
+    {% else %}
+      <p class="muted">
+        Para alterar a personalidade do Zezim ou adicionar contexto de empresa/documento,
+        faça login.
+      </p>
+      <a href="{{ url_for('login') }}" class="btn-primary full">Entrar na área admin</a>
+    {% endif %}
+
+    <div class="info-box">
+      <h3>Modo atual</h3>
+      <p>
+        <strong>Personalidade:</strong><br>
+        <span class="small-text">{{ persona_text }}</span>
+      </p>
+      <p>
+        <strong>Contexto:</strong>
+        {% if has_context %}
+          <span class="badge good">Carregado</span>
+        {% else %}
+          <span class="badge">Nenhum</span>
+        {% endif %}
+      </p>
+    </div>
+  </aside>
+</div>
+
+<script>
+  const chatForm = document.getElementById("chatForm");
+  const messageInput = document.getElementById("messageInput");
+  const chatWindow = document.getElementById("chatWindow");
+  const resetBtn = document.getElementById("resetChat");
+
+  function appendMessage(text, sender) {
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("message", sender);
+
+    const avatar = document.createElement("div");
+    avatar.classList.add("avatar");
+    avatar.textContent = sender === "user" ? "🧑" : "🤖";
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("bubble");
+    bubble.textContent = text;
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+    chatWindow.appendChild(wrapper);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+
+  chatForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = messageInput.value.trim();
+    if (!text) return;
+
+    appendMessage(text, "user");
+    messageInput.value = "";
+    messageInput.focus();
+
+    const typing = document.createElement("div");
+    typing.classList.add("message", "bot");
+    typing.innerHTML = '<div class="avatar">🤖</div><div class="bubble">Pensando...</div>';
+    chatWindow.appendChild(typing);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+
+    try {
+      const resp = await fetch("{{ url_for('chat') }}", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await resp.json();
+      chatWindow.removeChild(typing);
+
+      if (data.reply) {
+        appendMessage(data.reply, "bot");
+      } else if (data.error) {
+        appendMessage("Erro do servidor: " + data.error, "bot");
+      } else {
+        appendMessage("Ocorreu um erro ao obter resposta.", "bot");
+      }
+    } catch (err) {
+      chatWindow.removeChild(typing);
+      appendMessage("Erro de rede ao falar com o servidor.", "bot");
+    }
+  });
+
+  resetBtn.addEventListener("click", async () => {
+    try {
+      await fetch("{{ url_for('reset_chat') }}", {
+        method: "POST"
+      });
+      chatWindow.innerHTML = "";
+      appendMessage(
+        "Conversa limpa! O Zezim tá pronto pra começar de novo. 😊",
+        "bot"
+      );
+    } catch (err) {
+      appendMessage("Não foi possível limpar a conversa.", "bot");
+    }
+  });
+
+  messageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      chatForm.dispatchEvent(new Event("submit"));
+    }
+  });
+</script>
+{% endblock %}

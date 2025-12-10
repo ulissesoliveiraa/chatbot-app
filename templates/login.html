@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Login - Chatbot Zezim{% endblock %}
+
+{% block content %}
+<div class="card card-auth">
+  <h1 class="card-title">Acesso administrativo</h1>
+  <p class="card-subtitle">
+    Use o usuário <strong>chatbot</strong> e a senha <strong>@chatbot0123</strong> (padrão).
+  </p>
+
+  <form method="post" class="form">
+    <label class="form-label">
+      Usuário
+      <input type="text" name="username" class="input" required>
+    </label>
+
+    <label class="form-label">
+      Senha
+      <input type="password" name="password" class="input" required>
+    </label>
+
+    <button type="submit" class="btn-primary full">Entrar</button>
+  </form>
+</div>
+{% endblock %}
