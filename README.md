@@ -7,22 +7,34 @@ Ele foi desenvolvido para ser altamente flexível, simples de operar e adaptáve
 
 Entre suas funcionalidades:
 • Conversação livre com personalidade configurável
+
 • Upload de um ou vários arquivos de contexto (TXT e PDF)
+
 • Modo restrito baseado unicamente nos arquivos enviados
+
 • Modo híbrido: personalidade + contexto
+
 • Painel administrativo com login
+
 • Tema claro e escuro
+
 • Entrada por voz (speech to text)
+
 • Remoção individual de arquivos de contexto
+
 • Deploy completo na nuvem via Render
 
 Aplicação em Empresas e Organizações 🏢🤝
 O Chatbot Zezim foi projetado para ser facilmente implementado em empresas, instituições e organizações que desejam:
 
 • Atender clientes de forma mais rápida
+
 • Responder dúvidas frequentes automaticamente
+
 • Centralizar informações internas em um assistente virtual
+
 • Reduzir carga do atendimento humano
+
 • Disponibilizar respostas 24 horas por dia
 
 Ao adicionar documentos com informações internas (como tabelas, serviços, políticas, preços, procedimentos ou orientações), o chatbot passa a responder qualquer dúvida relacionada à empresa de maneira precisa e instantânea.
@@ -90,11 +102,17 @@ Arquivo de inicialização usado pelo Render
 
 Tecnologias Utilizadas 🧩
 • Python 3
+
 • Flask
+
 • HTML/CSS
+
 • JavaScript
+
 • OpenRouter API
+
 • Render (deploy)
+
 
 Aviso Legal ⚠️
 Este é um projeto autoral criado por Ulisses Oliveira.
