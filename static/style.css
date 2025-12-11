@@ -603,3 +603,41 @@ body {
         height: auto;
     }
 }
+
+/* ====== Olhinho no campo de senha (login) ====== */
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper .input {
+  width: 100%;
+  padding-right: 40px; /* espaço pro olho dentro do balão */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Botão de voltar na tela de login */
+.btn-back {
+  display: inline-block;
+  margin-bottom: 15px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 14px;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.btn-back:hover {
+  background: rgba(0,0,0,0.1);
+}

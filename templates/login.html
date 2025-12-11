@@ -3,12 +3,19 @@
 
 {% block content %}
 <div class="card card-auth">
+
+  <!-- BOTÃO VOLTAR -->
+  <a href="{{ url_for('index') }}" class="btn-back">← Voltar</a>
+
   <h1 class="card-title">Acesso administrativo</h1>
-  <p class="card-subtitle">
-    Use o usuário <strong>chatbot</strong> e a senha <strong>@chatbot0123</strong> (padrão).
+
+  <!-- Espaço preservado -->
+  <p class="card-subtitle" style="visibility: hidden;">
+    Placeholder
   </p>
 
   <form method="post" class="form">
+
     <label class="form-label">
       Usuário
       <input type="text" name="username" class="input" required>
@@ -16,10 +23,36 @@
 
     <label class="form-label">
       Senha
-      <input type="password" name="password" class="input" required>
+      <div class="password-wrapper">
+        <input
+          type="password"
+          name="password"
+          id="passwordInput"
+          class="input"
+          required
+        >
+
+        <!-- Ícone dentro do balão -->
+        <span id="togglePassword" class="password-toggle" title="Mostrar/ocultar senha">
+          👁️
+        </span>
+      </div>
     </label>
 
     <button type="submit" class="btn-primary full">Entrar</button>
   </form>
 </div>
+
+<!-- Script para alternar senha -->
+<script>
+  const input = document.getElementById("passwordInput");
+  const toggle = document.getElementById("togglePassword");
+
+  toggle.addEventListener("click", () => {
+    const visible = input.type === "text";
+    input.type = visible ? "password" : "text";
+    toggle.textContent = visible ? "👁️" : "🙈";
+  });
+</script>
+
 {% endblock %}
