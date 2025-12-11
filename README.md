@@ -1,11 +1,14 @@
 Chatbot Zezim – Assistente Virtual com Contexto Inteligente 🤖📄
+
 Projeto autoral desenvolvido para demonstrar a aplicação de IA generativa integrada a sistemas web, permitindo interação com usuários, leitura de documentos e personalização de comportamento.
 
 Descrição do Projeto 🧠
+
 O Chatbot Zezim é uma aplicação web criada em Python (Flask) que utiliza modelos de linguagem através da API OpenRouter.
 Ele foi desenvolvido para ser altamente flexível, simples de operar e adaptável a diferentes cenários.
 
 Entre suas funcionalidades:
+
 • Conversação livre com personalidade configurável
 
 • Upload de um ou vários arquivos de contexto (TXT e PDF)
@@ -25,6 +28,7 @@ Entre suas funcionalidades:
 • Deploy completo na nuvem via Render
 
 Aplicação em Empresas e Organizações 🏢🤝
+
 O Chatbot Zezim foi projetado para ser facilmente implementado em empresas, instituições e organizações que desejam:
 
 • Atender clientes de forma mais rápida
@@ -42,8 +46,15 @@ Ao adicionar documentos com informações internas (como tabelas, serviços, pol
 É como ter um funcionário disponível 24 horas por dia, sem intervalo, sem folgas e sempre preparado para atender o cliente com agilidade.
 
 Demonstração Online 🌐
+
 Você pode acessar a versão hospedada no Render:
 [https://chatbot-zezim.onrender.com/](https://chatbot-zezim.onrender.com/)
+
+Observação importante:
+
+Se o carregamento demorar, é porque o serviço entrou em modo de hibernação.
+O Render (plano gratuito) suspende automaticamente aplicações inativas e leva alguns segundos para reativá-las.
+A hospedagem foi configurada apenas para fins de demonstração e testes.
 
 Acesso ao Painel Administrativo 🔐
 Usuário: chatbot
@@ -115,11 +126,14 @@ Tecnologias Utilizadas 🧩
 
 
 Aviso Legal ⚠️
+
 Este é um projeto autoral criado por Ulisses Oliveira.
 Não é permitido copiar, publicar, redistribuir, utilizar ou adaptar este código, total ou parcialmente, sem autorização expressa do autor.
 
 Contato 📬
+
 Para dúvidas, parcerias, implementação empresarial ou solicitação de autorização, entre em contato diretamente com o autor.
+
 - email: j.ulisses1312@gmail.com
 - email: ulisses9@hotmail.com.br
 
