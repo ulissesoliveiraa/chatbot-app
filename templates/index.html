@@ -24,11 +24,19 @@
     </div>
 
     <form id="chatForm" class="chat-input-area">
+
+      <!-- Botão de áudio -->
+      <button type="button" id="micBtn" class="mic-btn" title="Fazer pergunta por voz">
+        🎤
+      </button>
+
+      <!-- Campo de texto -->
       <textarea
         id="messageInput"
         rows="2"
-        placeholder="Digite sua pergunta e pressione Enter ou clique em Enviar..."
+        placeholder="Digite sua pergunta ou use o microfone..."
       ></textarea>
+
       <button type="submit" class="btn-primary">Enviar</button>
     </form>
   </section>
@@ -41,6 +49,7 @@
         Você está logado. Aqui você pode controlar a personalidade do Zezim e o contexto de empresa/documento.
       </p>
 
+      <!-- FORM PRINCIPAL: personalidade, modo e upload de arquivos -->
       <form method="post" action="{{ url_for('config') }}" enctype="multipart/form-data" class="form">
 
         <label class="form-label">
@@ -51,7 +60,7 @@
             class="input textarea"
           >{{ persona_text }}</textarea>
           <span class="help-text">
-            Descreva como o Zezim deve se comportar (tom de voz, estilo de resposta, etc.).
+            Descreva como o Zezim deve se comportar (tom de voz, estilo de resposta, público-alvo, etc.).
           </span>
         </label>
 
@@ -59,31 +68,65 @@
           Modo de resposta
           <select name="mode" class="input">
             <option value="no_context" {% if mode == "no_context" %}selected{% endif %}>
-              Sem contexto (apenas personalidade)
+              Apenas personalidade (sem arquivo)
             </option>
             <option value="context" {% if mode == "context" %}selected{% endif %}>
-              Usar contexto de empresa/documento
+              Somente contexto de empresa/documento (modo restrito)
+            </option>
+            <option value="both" {% if mode == "both" %}selected{% endif %}>
+              Personalidade + contexto de empresa (arquivo)
             </option>
           </select>
           <span class="help-text">
-            Em modo contexto, o Zezim responde somente com base nos dados enviados.
+            • <strong>Apenas personalidade:</strong> Zezim responde livre, sem usar arquivo.<br>
+            • <strong>Somente contexto:</strong> Zezim responde <u>apenas</u> com base nos arquivos enviados.<br>
+            • <strong>Personalidade + contexto:</strong> Zezim prioriza os arquivos, mas pode complementar com conhecimento geral.
           </span>
         </label>
 
+        <!-- ARQUIVOS DE CONTEXTO: múltiplos -->
         <label class="form-label">
-          Arquivo de contexto (.txt ou .pdf)
-          <input type="file" name="context_file" class="input">
-          {% if has_context %}
-            <span class="badge good">Contexto atual carregado ✅</span>
-          {% else %}
-            <span class="badge">Nenhum arquivo carregado.</span>
-          {% endif %}
+          Arquivo(s) de contexto (.txt ou .pdf)
+          <input type="file" name="context_files" class="input" multiple>
+          <span class="help-text">
+            Você pode selecionar um ou vários arquivos de uma vez. Eles serão usados como base de conhecimento do Zezim.
+          </span>
         </label>
 
+        <!-- Botão de salvar configurações -->
         <button type="submit" class="btn-secondary full">
           Salvar configurações
         </button>
       </form>
+
+      <!-- LISTA DE ARQUIVOS + FORM DE REMOÇÃO (FORA DO FORM PRINCIPAL) -->
+      {% if context_files %}
+        <div class="context-list">
+          <span class="help-text">Arquivos de contexto carregados:</span>
+          <ul>
+            {% for f in context_files %}
+              <li class="small-text">• {{ f.name }}</li>
+            {% endfor %}
+          </ul>
+
+          <form method="post" action="{{ url_for('remove_context') }}" class="context-remove-form">
+            <label class="form-label">
+              Remover arquivo de contexto
+              <select name="file_id" class="input">
+                {% for f in context_files %}
+                  <option value="{{ f.id }}">{{ f.name }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <button type="submit" class="btn-danger small">
+              Remover arquivo
+            </button>
+          </form>
+        </div>
+      {% else %}
+        <span class="badge">Nenhum arquivo carregado.</span>
+      {% endif %}
+
     {% else %}
       <p class="muted">
         Para alterar a personalidade do Zezim ou adicionar contexto de empresa/documento,
@@ -93,11 +136,13 @@
     {% endif %}
 
     <div class="info-box">
-      <h3>Modo atual</h3>
+      <h3>🧠 Modo atual</h3>
+
       <p>
         <strong>Personalidade:</strong><br>
         <span class="small-text">{{ persona_text }}</span>
       </p>
+
       <p>
         <strong>Contexto:</strong>
         {% if has_context %}
@@ -106,16 +151,36 @@
           <span class="badge">Nenhum</span>
         {% endif %}
       </p>
+
+      <p class="small-text" style="margin-top:6px;">
+        Modo selecionado:
+        {% if mode == "no_context" %}
+          Apenas personalidade.
+        {% elif mode == "context" %}
+          Somente contexto de empresa/documento (restrito).
+        {% elif mode == "both" %}
+          Personalidade + contexto de empresa (arquivo).
+        {% else %}
+          (não definido)
+        {% endif %}
+      </p>
     </div>
   </aside>
 </div>
 
 <script>
+  // ===========================
+  // REFERÊNCIAS DOS ELEMENTOS
+  // ===========================
   const chatForm = document.getElementById("chatForm");
   const messageInput = document.getElementById("messageInput");
   const chatWindow = document.getElementById("chatWindow");
   const resetBtn = document.getElementById("resetChat");
+  const micBtn = document.getElementById("micBtn");
 
+  // ===========================
+  // FUNÇÃO UTILITÁRIA: ADICIONAR MENSAGEM
+  // ===========================
   function appendMessage(text, sender) {
     const wrapper = document.createElement("div");
     wrapper.classList.add("message", sender);
@@ -134,6 +199,9 @@
     chatWindow.scrollTop = chatWindow.scrollHeight;
   }
 
+  // ===========================
+  // ENVIO DE MENSAGENS (TEXTO)
+  // ===========================
   chatForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const text = messageInput.value.trim();
@@ -172,6 +240,9 @@
     }
   });
 
+  // ===========================
+  // RESETAR CONVERSA
+  // ===========================
   resetBtn.addEventListener("click", async () => {
     try {
       await fetch("{{ url_for('reset_chat') }}", {
@@ -187,10 +258,73 @@
     }
   });
 
+  // ===========================
+  // ENTER = ENVIAR (SEM SHIFT)
+  // ===========================
   messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       chatForm.dispatchEvent(new Event("submit"));
+    }
+  });
+
+  // ===========================
+  // RECONHECIMENTO DE VOZ 🎤
+  // ===========================
+  let recognition = null;
+  let isRecording = false;
+
+  if ("webkitSpeechRecognition" in window) {
+    recognition = new webkitSpeechRecognition();
+  } else if ("SpeechRecognition" in window) {
+    recognition = new SpeechRecognition();
+  }
+
+  if (recognition) {
+    recognition.lang = "pt-BR";
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    recognition.onstart = function () {
+      isRecording = true;
+      micBtn.classList.add("recording");
+      micBtn.textContent = "🔴";
+    };
+
+    recognition.onerror = function () {
+      isRecording = false;
+      micBtn.classList.remove("recording");
+      micBtn.textContent = "🎤";
+    };
+
+    recognition.onend = function () {
+      isRecording = false;
+      micBtn.classList.remove("recording");
+      micBtn.textContent = "🎤";
+    };
+
+    recognition.onresult = function (event) {
+      let text = "";
+
+      for (let i = 0; i < event.results.length; i++) {
+        text += event.results[i][0].transcript;
+      }
+
+      messageInput.value = text;
+      messageInput.focus();
+    };
+  }
+
+  micBtn.addEventListener("click", () => {
+    if (!recognition) {
+      alert("Seu navegador não suporta reconhecimento de voz.\nUse Chrome ou Edge. 😢");
+      return;
+    }
+
+    if (!isRecording) {
+      recognition.start();
+    } else {
+      recognition.stop();
     }
   });
 </script>

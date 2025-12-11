@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <title>{% block title %}Chatbot Zezim{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -9,30 +9,59 @@
 <body>
   <header class="topbar">
     <div class="topbar-left">
-      <span class="logo">🤖 Chatbot Zezim</span>
+      <div class="logo">🤖 Chatbot Zezim</div>
     </div>
     <div class="topbar-right">
       {% if logged_in %}
-        <span class="user-badge">Painel admin</span>
+        <span class="user-badge">👤 Admin</span>
         <a href="{{ url_for('logout') }}" class="btn-outline">Sair</a>
       {% else %}
-        <a href="{{ url_for('login') }}" class="btn-outline">Login</a>
+        <a href="{{ url_for('login') }}" class="btn-outline">Login admin</a>
       {% endif %}
+      <button id="themeToggle" class="btn-outline">🌙 Dark</button>
     </div>
   </header>
 
   <main class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flash-container">
-          {% for category, msg in messages %}
-            <div class="flash flash-{{ category }}">{{ msg }}</div>
+    <div class="flash-container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
           {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+        {% endif %}
+      {% endwith %}
+    </div>
 
     {% block content %}{% endblock %}
   </main>
+
+  <script>
+    // Toggle de tema claro/escuro
+    const btn = document.getElementById("themeToggle");
+    const root = document.documentElement;
+
+    // Aplica tema salvo
+    if (localStorage.getItem("theme") === "dark") {
+      root.setAttribute("data-theme", "dark");
+      if (btn) btn.textContent = "☀️ Light";
+    }
+
+    if (btn) {
+      btn.addEventListener("click", () => {
+        const isDark = root.getAttribute("data-theme") === "dark";
+
+        if (isDark) {
+          root.removeAttribute("data-theme");
+          localStorage.setItem("theme", "light");
+          btn.textContent = "🌙 Dark";
+        } else {
+          root.setAttribute("data-theme", "dark");
+          localStorage.setItem("theme", "dark");
+          btn.textContent = "☀️ Light";
+        }
+      });
+    }
+  </script>
 </body>
 </html>
